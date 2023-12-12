@@ -13,3 +13,4 @@
 >   - Are there biases or blind spots
 
 ## [Submit here](https://bcourses.berkeley.edu/courses/1529565/assignments/8643637)
+## [Document Here](https://docs.google.com/document/d/1MEIBZViJMAdBCIHUTp_yifN10ka_ihtoYNtryIebuGU/edit?usp=sharing)
