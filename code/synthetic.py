@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
-
+import os
+import scipy.stats as stats
 def rotate_video(input_path, output_path, angle=90):
     cap = cv2.VideoCapture(input_path)
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
@@ -11,7 +12,10 @@ def rotate_video(input_path, output_path, angle=90):
         size = (height, width)
     else:
         size = (width, height)
-    
+        
+    intermediate_path = "/".join(output_path.split("/")[:-1])
+    if not os.path.exists(intermediate_path):
+        os.makedirs(intermediate_path)
     writer = cv2.VideoWriter(output_path, fourcc, fps, size)
     
     while True:
@@ -30,6 +34,9 @@ def flip_video(input_path, output_path, flip_code=1):
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
     fps = cap.get(cv2.CAP_PROP_FPS)
     size = (int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)), int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)))
+    intermediate_path = "/".join(output_path.split("/")[:-1])
+    if not os.path.exists(intermediate_path):
+        os.makedirs(intermediate_path)
     writer = cv2.VideoWriter(output_path, fourcc, fps, size)
     
     while True:
@@ -47,6 +54,9 @@ def crop_video(input_path, output_path, x, y, w, h):
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
     fps = cap.get(cv2.CAP_PROP_FPS)
     size = (w, h)
+    intermediate_path = "/".join(output_path.split("/")[:-1])
+    if not os.path.exists(intermediate_path):
+        os.makedirs(intermediate_path)
     writer = cv2.VideoWriter(output_path, fourcc, fps, size)
     
     while True:
@@ -59,11 +69,16 @@ def crop_video(input_path, output_path, x, y, w, h):
     cap.release()
     writer.release()
 
-def jitter_and_noise_video(input_path, output_path, brightness=0.2, noise_amount=0.04):
+def noise_video(input_path, output_path, brightness=0.2, noise_amount=0.04):
+    brightness = stats.norm.rvs(loc=brightness, scale=0.1)
+    noise_amount = stats.norm.rvs(loc=noise_amount, scale=0.01)
     cap = cv2.VideoCapture(input_path)
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
     fps = cap.get(cv2.CAP_PROP_FPS)
     size = (int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)), int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)))
+    intermediate_path = "/".join(output_path.split("/")[:-1])
+    if not os.path.exists(intermediate_path):
+        os.makedirs(intermediate_path)
     writer = cv2.VideoWriter(output_path, fourcc, fps, size)
     
     while True:
