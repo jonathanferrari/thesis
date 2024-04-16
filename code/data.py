@@ -29,7 +29,7 @@ def load_video(file_path, target_frames=20, target_size=(64, 64)):
         frame = cv2.resize(frame, target_size)
         frames.append(frame)
     cap.release()
-
+    
     # Convert list of frames to numpy array
     video = np.array(frames)
     num_frames = video.shape[0]
@@ -57,7 +57,14 @@ class VideoDataGenerator(Sequence):
 
     def __getitem__(self, idx):
         batch_files = self.file_paths[idx * self.batch_size:(idx + 1) * self.batch_size]
-        videos = [load_video(file) for file in batch_files]
+        videos = []
+        for file in batch_files:
+            try:
+                video = load_video(file)
+            except:
+                print(f"Error loading video: {file}")
+                break
+            videos.append(video)
         labels = [get_video_label(file) for file in batch_files]
         videos = np.array(videos)
         return videos, np.array(labels)
