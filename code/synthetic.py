@@ -12,7 +12,7 @@ def rotate_video(input_path, output_path, angle=90):
         size = (height, width)
     else:
         size = (width, height)
-        
+    
     intermediate_path = "/".join(output_path.split("/")[:-1])
     if not os.path.exists(intermediate_path):
         os.makedirs(intermediate_path)
@@ -22,12 +22,15 @@ def rotate_video(input_path, output_path, angle=90):
         ret, frame = cap.read()
         if not ret:
             break
-        frame = cv2.rotate(frame, cv2.ROTATE_90_CLOCKWISE) if angle == 90 else cv2.rotate(frame, cv2.ROTATE_90_COUNTERCLOCKWISE)
+        if angle == 90:
+            frame = cv2.rotate(frame, cv2.ROTATE_90_CLOCKWISE)
+        elif angle == 270:
+            frame = cv2.rotate(frame, cv2.ROTATE_90_COUNTERCLOCKWISE)
         writer.write(frame)
     
     cap.release()
     writer.release()
-
+    
 def flip_video(input_path, output_path, flip_code=1):
     # flip_code: 0 for vertical, 1 for horizontal, -1 for both axes
     cap = cv2.VideoCapture(input_path)
