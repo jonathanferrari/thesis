@@ -11,7 +11,7 @@ classes = list(labels_df.groupby('label').size().sort_values(ascending=False)[:1
 test_files = [f for f in files if labels[int(os.path.basename(f).split('.')[0])] in classes]
 
 
-BATCH_SIZE = 16
+BATCH_SIZE = 32
 AUTO = tf.data.AUTOTUNE
 INPUT_SHAPE = (20, 64, 64, 1)
 # OPTIMIZER
@@ -23,14 +23,14 @@ WEIGHT_DECAY = 1e-5
 EPOCHS = 10
 
 # TUBELET EMBEDDING
-PATCH_SIZE = (8, 8, 4)
+PATCH_SIZE = (8, 8, 8)
 NUM_PATCHES = (INPUT_SHAPE[0] // PATCH_SIZE[0]) ** 2
 
 # ViViT ARCHITECTURE
 LAYER_NORM_EPS = 1e-6
 PROJECTION_DIM = 156
-NUM_HEADS = 16
-NUM_LAYERS = 16
+NUM_HEADS = 10
+NUM_LAYERS = 10
 train_gen = VideoDataGenerator(test_files, batch_size=32)
 
 class TubeletEmbedding(layers.Layer):
@@ -50,7 +50,9 @@ class TubeletEmbedding(layers.Layer):
         return flattened_patches
     
     def build(self, input_shape):
-        return super().build(input_shape)
+        self.projection.build(input_shape)
+        self.flatten.build(self.projection.compute_output_shape(input_shape))
+        super().build(input_shape)
     
 class PositionalEncoder(layers.Layer):
     def __init__(self, embed_dim, **kwargs):
