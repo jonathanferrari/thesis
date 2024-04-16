@@ -5,6 +5,7 @@ import os
 from keras import layers, ops
 keras.config.disable_traceback_filtering()
 from data import VideoDataGenerator, labels, files, labels_df
+from keras.callbacks import ModelCheckpoint, CSVLogger
 
 
 classes = list(labels_df.groupby('label').size().sort_values(ascending=False)[:10].index)
@@ -29,8 +30,8 @@ NUM_PATCHES = (INPUT_SHAPE[0] // PATCH_SIZE[0]) ** 2
 # ViViT ARCHITECTURE
 LAYER_NORM_EPS = 1e-6
 PROJECTION_DIM = 156
-NUM_HEADS = 10
-NUM_LAYERS = 10
+NUM_HEADS = 12
+NUM_LAYERS = 12
 train_gen = VideoDataGenerator(test_files, batch_size=32)
 
 class TubeletEmbedding(layers.Layer):
@@ -53,7 +54,6 @@ class TubeletEmbedding(layers.Layer):
         self.projection.build(input_shape)
         self.flatten.build(self.projection.compute_output_shape(input_shape))
         super().build(input_shape)
-    
 class PositionalEncoder(layers.Layer):
     def __init__(self, embed_dim, **kwargs):
         super().__init__(**kwargs)
@@ -123,7 +123,10 @@ def create_vivit_classifier(
     model = keras.Model(inputs=inputs, outputs=outputs)
     return model
 
-def run_experiment(data = train_gen, validation = None, projection = PROJECTION_DIM, patch = PATCH_SIZE, learning_rate = LEARNING_RATE, epochs = EPOCHS):
+def run_experiment(name, data = train_gen, validation = None, projection = PROJECTION_DIM, patch = PATCH_SIZE, learning_rate = LEARNING_RATE, epochs = EPOCHS):
+    
+    csv_logger = CSVLogger(f"../models/{name}.csv")
+    checkpoint = ModelCheckpoint(f"../models/{name}.keras", save_best_only=True)
     
     model = create_vivit_classifier(
         tubelet_embedder=TubeletEmbedding(embed_dim=projection, patch_size=patch),
@@ -136,7 +139,7 @@ def run_experiment(data = train_gen, validation = None, projection = PROJECTION_
         metrics=[keras.metrics.SparseCategoricalAccuracy(name="accuracy"), keras.metrics.SparseTopKCategoricalAccuracy(5, name="top-5-accuracy")],
     )
     if validation is not None:
-        model.fit(data, validation_data=validation, batch_size=BATCH_SIZE, epochs=epochs)
+        model.fit(data, validation_data=validation, batch_size=BATCH_SIZE, epochs=epochs, callbacks=[csv_logger, checkpoint])
     else:
         model.fit(data, batch_size=BATCH_SIZE, epochs=epochs)
     _, accuracy, top_5_accuracy = model.evaluate(train_gen, batch_size=BATCH_SIZE)
