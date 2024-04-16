@@ -134,7 +134,7 @@ def run_experiment(name, data = train_gen, validation = None, projection = PROJE
         num_classes=NUM_CLASSES,
     )
     model.compile(
-        optimizer=keras.optimizers.Adam(learning_rate=learning_rate),
+        optimizer=keras.optimizers.Adam(learning_rate=learning_rate, weight_decay=WEIGHT_DECAY),
         loss="sparse_categorical_crossentropy",
         metrics=[keras.metrics.SparseCategoricalAccuracy(name="accuracy"), keras.metrics.SparseTopKCategoricalAccuracy(5, name="top-5-accuracy")],
     )
