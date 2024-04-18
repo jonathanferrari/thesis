@@ -142,7 +142,7 @@ def run_experiment(name, data = train_gen, validation = None, projection = PROJE
         model.fit(data, validation_data=validation, batch_size=BATCH_SIZE, epochs=epochs, callbacks=[csv_logger, checkpoint])
     else:
         model.fit(data, batch_size=BATCH_SIZE, epochs=epochs)
-    _, accuracy, top_5_accuracy = model.evaluate(train_gen, batch_size=BATCH_SIZE)
+    _, accuracy, top_5_accuracy = model.evaluate(data, batch_size=BATCH_SIZE)
     print(f"Accuracy: {accuracy * 100:.2f}%")
     print(f"Top 5 Accuracy: {top_5_accuracy * 100:.2f}%")
     
