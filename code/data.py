@@ -18,7 +18,7 @@ def get_video_label(file):
     file_id = int(os.path.basename(file).split('.')[0])
     return label_to_num[labels[file_id]]
 
-def load_video(file_path, target_frames=20, target_size=(64, 64)):
+def load_video(file_path, target_frames=20, target_size=(64, 64), original = False):
     cap = cv2.VideoCapture(file_path)
     frames = []
     while True:
@@ -32,6 +32,8 @@ def load_video(file_path, target_frames=20, target_size=(64, 64)):
     
     # Convert list of frames to numpy array
     video = np.array(frames)
+    if original:
+        return video
     num_frames = video.shape[0]
     if num_frames < target_frames:
         pad = np.zeros((target_frames - num_frames, *target_size))
