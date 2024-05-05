@@ -25,8 +25,9 @@ def load_video(file_path, target_frames=20, target_size=(64, 64), original = Fal
         ret, frame = cap.read()
         if not ret:
             break
-        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        frame = cv2.resize(frame, target_size)
+        if not original:
+            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+            frame = cv2.resize(frame, target_size)
         frames.append(frame)
     cap.release()
     
@@ -36,11 +37,15 @@ def load_video(file_path, target_frames=20, target_size=(64, 64), original = Fal
         return video
     num_frames = video.shape[0]
     if num_frames < target_frames:
-        pad = np.zeros((target_frames - num_frames, *target_size))
-        video = np.concatenate([pad, video], axis=0)
+        pad = np.zeros(target_size)
+        while video.shape[0] < target_frames:
+            video = np.concatenate([video, np.expand_dims(pad, axis=0)], axis=0)
+            if video.shape[0] == target_frames:
+                break
+            video = np.concatenate([np.expand_dims(pad, axis=0), video], axis=0)
     elif num_frames > target_frames:
-        start = np.random.randint(0, num_frames - target_frames)
-        video = video[start:start + target_frames]
+        frames = np.linspace(0, num_frames, target_frames, endpoint=False).astype(int)
+        video = video[frames]
 
     # Expand dimensions to have the channel last
     video = np.expand_dims(video, axis=-1)
