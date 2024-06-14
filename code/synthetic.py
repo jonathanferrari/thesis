@@ -97,3 +97,44 @@ def noise_video(input_path, output_path, brightness=0.2, noise_amount=0.04):
     
     cap.release()
     writer.release()
+    
+def blur_video(input_path, output_path, blur_amount=1):
+    blur_amount = stats.norm.rvs(loc=blur_amount, scale=0.1)
+    cap = cv2.VideoCapture(input_path)
+    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+    fps = cap.get(cv2.CAP_PROP_FPS)
+    size = (int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)), int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)))
+    intermediate_path = "/".join(output_path.split("/")[:-1])
+    if not os.path.exists(intermediate_path):
+        os.makedirs(intermediate_path)
+    writer = cv2.VideoWriter(output_path, fourcc, fps, size)
+    
+    while True:
+        ret, frame = cap.read()
+        if not ret:
+            break
+        frame = cv2.GaussianBlur(frame, (0, 0), blur_amount)
+        writer.write(frame)
+    
+    cap.release()
+    writer.release()
+    
+def temporal_crop_video(input_path, output_path, p = 0.5):
+    cap = cv2.VideoCapture(input_path)
+    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+    fps = cap.get(cv2.CAP_PROP_FPS)
+    size = (int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)), int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)))
+    intermediate_path = "/".join(output_path.split("/")[:-1])
+    if not os.path.exists(intermediate_path):
+        os.makedirs(intermediate_path)
+    writer = cv2.VideoWriter(output_path, fourcc, fps, size)
+    
+    while True:
+        ret, frame = cap.read()
+        if not ret:
+            break
+        if np.random.rand() < p:
+            writer.write(frame)
+    
+    cap.release()
+    writer.release()
